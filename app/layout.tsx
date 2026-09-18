@@ -10,7 +10,7 @@ const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jet
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space-grotesk' });
 
 export const metadata: Metadata = {
-  title: 'VerisAI | Know before you trust.',
+  title: 'Crexto AI | Know before you trust.',
   description: 'AI analyzes products, documents, offers and digital work — then gives you clear evidence, risks and next steps. Register cryptographic proofs on-chain.',
 };
 

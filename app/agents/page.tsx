@@ -65,7 +65,7 @@ export default function AgentsDirectoryPage() {
   return (
     <div className="section py-12 md:py-16 animate-fade-in-up">
       <div className="text-center mb-12 md:mb-16">
-        <h1 className="font-display text-4xl font-bold mb-4">VerisAI Agents</h1>
+        <h1 className="font-display text-4xl font-bold mb-4">Crexto AI Agents</h1>
         <p className="text-[var(--text-secondary)] text-lg max-w-2xl mx-auto">
           Choose a specialized AI agent to analyze your information. Each agent is tuned for a specific purpose and produces structured, verifiable intelligence.
         </p>

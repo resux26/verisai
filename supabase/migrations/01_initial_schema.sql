@@ -1,4 +1,4 @@
--- Supabase SQL Schema for Proofly AI 2.0
+-- Supabase SQL Schema for Crexto AI 2.0
 -- Run this in your Supabase SQL Editor
 
 -- 1. Profiles Table

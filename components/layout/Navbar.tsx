@@ -55,12 +55,7 @@ export function Navbar() {
         
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white" style={{ background: 'var(--gradient-analysis)' }}>
-            <Hexagon className="w-5 h-5 fill-white/20" />
-          </div>
-          <span className="font-display font-bold text-xl tracking-tight">
-            Veris<span className="text-[var(--accent-proof)]">AI</span>
-          </span>
+          <img src="/logo.png" alt="Crexto AI Logo" className="h-8 w-auto object-contain" />
         </Link>
 
         {/* Desktop Navigation */}

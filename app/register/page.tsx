@@ -19,7 +19,7 @@ export default function RegisterPage({
           </div>
           <h2 className="font-display text-2xl font-bold text-center">Create an account</h2>
           <p className="text-[var(--text-secondary)] text-sm text-center mt-2">
-            Join VerisAI to analyze documents and register cryptographic proofs.
+            Join Crexto AI to analyze documents and register cryptographic proofs.
           </p>
         </div>
 

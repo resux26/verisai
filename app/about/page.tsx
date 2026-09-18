@@ -10,12 +10,12 @@ export default function AboutPage() {
         <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-md" style={{ background: 'var(--gradient-analysis)' }}>
           <Hexagon className="w-6 h-6 fill-white/20" />
         </div>
-        <h1 className="font-display text-4xl font-bold">About VerisAI</h1>
+        <h1 className="font-display text-4xl font-bold">About Crexto AI</h1>
       </div>
 
       <div className="prose prose-invert max-w-none">
         <p className="text-xl text-[var(--text-secondary)] leading-relaxed mb-12">
-          VerisAI is a next-generation platform designed to help professionals, creators, and students build verifiable digital identities. We combine the generative power of Artificial Intelligence with the cryptographic immutability of Blockchain technology.
+          Crexto AI is a next-generation platform designed to help professionals, creators, and students build verifiable digital identities. We combine the generative power of Artificial Intelligence with the cryptographic immutability of Blockchain technology.
         </p>
 
         <div className="grid md:grid-cols-2 gap-8 mb-12">

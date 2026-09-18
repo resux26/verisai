@@ -90,10 +90,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* WHY VERISAI */}
+      {/* WHY CREXTO AI */}
       <section className="section py-16 md:py-20 bg-[var(--bg-surface)] border-t border-b border-[var(--border-subtle)]">
         <div className="text-center mb-12 md:mb-16">
-          <h2 className="font-display text-3xl font-bold">Why VerisAI</h2>
+          <h2 className="font-display text-3xl font-bold">Why Crexto AI</h2>
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
