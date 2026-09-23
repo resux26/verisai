@@ -124,7 +124,7 @@ export default function ProofStudio() {
               <div className="flex items-start gap-3 p-4 bg-color-info-bg border border-color-info/20 rounded-lg text-sm text-color-info">
                 <Info className="w-5 h-5 shrink-0 mt-0.5" />
                 <p>
-                  <strong>Demo Mode:</strong> You are seeing sample analysis data because the Gemini API key is not configured. 
+                  <strong>Preview Mode:</strong> You are seeing sample analysis data because the Gemini API key is not configured. 
                   You can still register this proof on the testnet using a connected wallet.
                 </p>
               </div>

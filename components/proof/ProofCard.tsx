@@ -37,7 +37,7 @@ export function ProofCard({ proof }: ProofCardProps) {
         </div>
         <div className="flex flex-col items-end gap-2">
           <Badge variant="verified">Verified</Badge>
-          {proof.isDemo && <Badge variant="demo" className="text-[10px] py-0.5 px-2">Demo</Badge>}
+          
         </div>
       </div>
 

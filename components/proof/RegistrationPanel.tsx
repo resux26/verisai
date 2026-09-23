@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
-import { ConnectButton } from '../wallet/ConnectButton';
 import { TransactionStatus } from '../ui/TransactionStatus';
 import { useRegisterProof } from '../../lib/blockchain/contract';
 import Link from 'next/link';
@@ -88,7 +87,7 @@ export function RegistrationPanel({
       <div>
         <h3 className="text-xl font-bold mb-2">Register On-Chain Proof</h3>
         <p className="text-text-secondary text-sm mb-4">
-          Anchor this document's fingerprint to the blockchain to prove your ownership at this specific time.
+          Anchor this document&apos;s fingerprint to the blockchain to prove your ownership at this specific time.
         </p>
       </div>
 
@@ -114,11 +113,13 @@ export function RegistrationPanel({
       </div>
 
       {!isConnected && !isDemoMode ? (
-        <div className="flex flex-col items-center justify-center p-6 border border-dashed border-border-default rounded-lg gap-4">
-          <p className="text-sm text-center text-text-secondary">
-            Connect your wallet to Base Sepolia testnet to register this proof.
+        <div className="flex flex-col items-center justify-center p-6 border border-dashed border-[var(--border-subtle)] rounded-lg gap-4">
+          <p className="text-sm text-center text-[var(--text-secondary)] font-medium">
+            On-chain proof connection coming soon.
           </p>
-          <ConnectButton />
+          <p className="text-xs text-center text-[var(--text-tertiary)] max-w-xs">
+            We are upgrading our verification infrastructure. Wallet connections are temporarily disabled.
+          </p>
         </div>
       ) : status === 'idle' || status === 'error' ? (
         <Button 

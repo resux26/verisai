@@ -58,13 +58,25 @@ export default function CareerStudio() {
   return (
     <div className="section w-full py-12">
       <div className="mb-8">
-        <h1 className="font-display text-3xl md:text-4xl font-bold mb-4 flex items-center gap-3">
-          <Briefcase className="w-8 h-8 text-[#A855F7]" /> AI Career Studio
-        </h1>
-        <p className="text-[var(--text-secondary)] text-lg max-w-2xl">
-          Transform your raw experience into a polished, professional CV in seconds. 
-          Our AI structures, formats, and enhances your profile automatically.
-        </p>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+          <div>
+            <h1 className="font-display text-3xl md:text-4xl font-bold mb-4 flex items-center gap-3">
+              <Briefcase className="w-8 h-8 text-[#A855F7]" /> AI Career Studio
+            </h1>
+            <p className="text-[var(--text-secondary)] text-lg max-w-2xl">
+              Transform your raw experience into a polished, professional CV in seconds. 
+              Our AI structures, formats, and enhances your profile automatically.
+            </p>
+          </div>
+          <div className="flex gap-3 shrink-0">
+            <Link href="/career/templates">
+              <Button variant="outline" className="h-10 border-[#A855F7]/30 text-[#A855F7]">Browse Templates</Button>
+            </Link>
+            <Link href="/dashboard/templates/new">
+              <Button className="h-10 bg-[#A855F7] hover:bg-[#9333EA] text-white border-none shadow-glow">Upload Template</Button>
+            </Link>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -82,7 +94,7 @@ export default function CareerStudio() {
             <div className="flex items-start gap-3 p-4 bg-[var(--status-info-bg)] border border-[var(--status-info)]/20 rounded-lg text-sm text-[var(--status-info)]">
               <Info className="w-5 h-5 shrink-0 mt-0.5" />
               <p>
-                <strong>Demo Mode:</strong> The Gemini API key is not configured, so a sample CV is being displayed. 
+                <strong>Preview Mode:</strong> The Gemini API key is not configured, so a sample CV is being displayed. 
                 In production, this would be generated from your input.
               </p>
             </div>

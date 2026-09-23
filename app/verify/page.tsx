@@ -58,7 +58,7 @@ export default function VerifySearchPage() {
         </form>
 
         <div className="mt-8 pt-6 border-t border-border-default">
-          <h3 className="text-sm font-medium text-text-secondary mb-3">Try checking a Demo Proof:</h3>
+          <h3 className="text-sm font-medium text-text-secondary mb-3">Try checking a Sample Proof:</h3>
           <div className="flex gap-2">
             {[1, 2, 3].map((id) => (
               <Button 

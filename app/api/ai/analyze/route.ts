@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { runAgentAnalysis } from '@/lib/ai/aiClient';
 import { createClient } from '@/lib/database/supabase/server';
+import { isValidAgentId } from '@/lib/agents/config';
 
 export async function POST(request: Request) {
   try {
@@ -15,6 +16,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    // Validate agent type against known agents
+    if (!isValidAgentId(agentType)) {
+      return NextResponse.json({ error: `Invalid agent type: ${agentType}` }, { status: 400 });
+    }
+
     if (!process.env.GEMINI_API_KEY) {
       return NextResponse.json({ 
         error: 'AI is currently unavailable. (GEMINI_API_KEY is not configured)' 
@@ -26,12 +32,11 @@ export async function POST(request: Request) {
     // Save to database if authenticated
     if (user && !authError && inputHash) {
       try {
-        // We will calculate a pseudo-hash for the analysis content to use in the proof
-        // In a real prod environment we'd use a robust hashing method on the structured JSON
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const crypto = require('crypto');
         const analysisHash = crypto.createHash('sha256').update(JSON.stringify(result)).digest('hex');
 
-        await supabase.from('analyses').insert({
+        const { data: insertedData, error: insertError } = await supabase.from('analyses').insert({
           user_id: user.id,
           agent_type: agentType,
           title: title || 'Untitled Analysis',
@@ -39,7 +44,13 @@ export async function POST(request: Request) {
           analysis_hash: analysisHash,
           structured_result: result,
           is_public: false
-        });
+        }).select('id').single();
+
+        if (insertedData) {
+          // Grant reputation and token reward
+          const { grantReward } = await import('@/lib/token/rewards');
+          await grantReward(user.id, 'analysis_completed', insertedData.id);
+        }
         
         // Pass the analysisHash back to the client so they can register it on-chain
         result._analysisHash = analysisHash;

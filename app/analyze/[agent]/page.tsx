@@ -3,12 +3,23 @@
 import React, { useState, use } from 'react';
 import { FileUpload } from '@/components/ui/FileUpload';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { RegistrationPanel } from '@/components/proof/RegistrationPanel';
-import { hashFile, readFileContent, toBytes32 } from '@/lib/hashing/sha256';
-import { AlertTriangle, CheckCircle2, Info, Lightbulb, Search, MessageSquareWarning, ArrowRight } from 'lucide-react';
+import { AgentReport } from '@/components/agents/AgentReport';
+import { hashFile, readFileContent } from '@/lib/hashing/sha256';
+import { AGENT_CONFIGS, isValidAgentId, type AgentId } from '@/lib/agents/config';
+import { Search, ShieldCheck, TrendingUp, Eye, FileSearch, Briefcase, Blocks, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+
+const AGENT_ICONS: Record<string, React.ReactNode> = {
+  ShieldCheck: <ShieldCheck className="w-5 h-5" />,
+  TrendingUp: <TrendingUp className="w-5 h-5" />,
+  Eye: <Eye className="w-5 h-5" />,
+  FileSearch: <FileSearch className="w-5 h-5" />,
+  Briefcase: <Briefcase className="w-5 h-5" />,
+  Blocks: <Blocks className="w-5 h-5" />,
+};
 
 export default function AnalyzeWorkspacePage({ params }: { params: Promise<{ agent: string }> }) {
   const unwrappedParams = use(params);
@@ -24,18 +35,41 @@ export default function AnalyzeWorkspacePage({ params }: { params: Promise<{ age
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Validate agent type
+  if (!isValidAgentId(agentType)) {
+    return (
+      <div className="w-full min-h-[calc(100vh-64px)] flex flex-col items-center justify-center text-center p-6">
+        <h1 className="text-3xl font-bold mb-4">Agent Not Found</h1>
+        <p className="text-[var(--text-secondary)] mb-6">
+          There is no agent called &quot;{agentType}&quot;.
+        </p>
+        <Link href="/agents">
+          <Button>
+            <ArrowLeft className="w-4 h-4 mr-2" /> View All Agents
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
+  const config = AGENT_CONFIGS[agentType as AgentId];
+  const agentId = agentType as AgentId;
+
   const handleAnalyzeText = async () => {
     if (!textInput.trim()) return;
     
     setError(null);
     setAnalysisResult(null);
     setIsAnalyzing(true);
-    setFile(null); // Clear file if text was used
+    setFile(null);
 
     try {
-      // Create a pseudo-file hash for the text input
-      const crypto = await import('crypto');
-      const hash = crypto.createHash('sha256').update(textInput).digest('hex');
+      // Create a hash for the text input
+      const encoder = new TextEncoder();
+      const data = encoder.encode(textInput);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
       const computedHashHex = `0x${hash}`;
       setInputHash(computedHashHex);
 
@@ -43,10 +77,10 @@ export default function AnalyzeWorkspacePage({ params }: { params: Promise<{ age
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          agentType, 
+          agentType: agentId, 
           fileContent: textInput, 
           isImage: false,
-          title: `Text Snippet / URL`,
+          title: `Text Analysis`,
           inputHash: computedHashHex
         })
       });
@@ -56,8 +90,8 @@ export default function AnalyzeWorkspacePage({ params }: { params: Promise<{ age
         throw new Error(errData?.error || 'Analysis failed. Please try again.');
       }
 
-      const data = await response.json();
-      setAnalysisResult(data);
+      const result = await response.json();
+      setAnalysisResult(result);
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'An error occurred during analysis.');
@@ -68,26 +102,23 @@ export default function AnalyzeWorkspacePage({ params }: { params: Promise<{ age
 
   const handleAnalyze = async (uploadedFile: File) => {
     setFile(uploadedFile);
-    setTextInput(''); // Clear text if file was used
+    setTextInput('');
     setError(null);
     setAnalysisResult(null);
     setIsAnalyzing(true);
     
     try {
-      // 1. Hash the file locally
       const computedHash = await hashFile(uploadedFile);
       const computedHashHex = `0x${computedHash}`;
       setInputHash(computedHashHex);
 
-      // 2. Read content
       const { text, isImage } = await readFileContent(uploadedFile);
       
-      // 3. Send to AI
       const response = await fetch('/api/ai/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          agentType, 
+          agentType: agentId, 
           fileContent: text, 
           isImage,
           title: uploadedFile.name,
@@ -100,8 +131,8 @@ export default function AnalyzeWorkspacePage({ params }: { params: Promise<{ age
         throw new Error(errData?.error || 'Analysis failed. Please try again.');
       }
 
-      const data = await response.json();
-      setAnalysisResult(data);
+      const result = await response.json();
+      setAnalysisResult(result);
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'An error occurred during analysis.');
@@ -110,47 +141,77 @@ export default function AnalyzeWorkspacePage({ params }: { params: Promise<{ age
     }
   };
 
-  const getVerdictStatus = (verdict: string) => {
-    const v = verdict.toLowerCase();
-    if (v.includes('fair') || v.includes('low') || v.includes('safe') || v.includes('strong')) return 'good';
-    if (v.includes('medium') || v.includes('moderate') || v.includes('caution')) return 'caution';
-    if (v.includes('high') || v.includes('expensive') || v.includes('weak')) return 'risk';
-    return 'default';
+  const handleReset = () => {
+    setFile(null);
+    setTextInput('');
+    setAnalysisResult(null);
+    setError(null);
+    setInputHash('');
   };
 
   return (
     <div className="w-full min-h-[calc(100vh-64px)] flex flex-col lg:flex-row">
       {/* LEFT PANE: INPUT */}
       <div className="w-full lg:w-[400px] xl:w-[450px] shrink-0 p-6 border-r border-[var(--border-subtle)] bg-[var(--bg-surface)] lg:overflow-y-auto lg:h-[calc(100vh-64px)]">
-        <h1 className="font-display text-3xl font-bold mb-2 capitalize">{agentType} Agent</h1>
-        <p className="text-sm text-[var(--text-secondary)] mb-8 leading-relaxed">
-          Upload evidence (screenshot, document, or code) for the AI to analyze.
+        {/* Agent Header */}
+        <Link href="/agents" className="inline-flex items-center gap-1.5 text-xs text-[var(--text-tertiary)] hover:text-[var(--text-primary)] mb-4 transition-colors">
+          <ArrowLeft className="w-3 h-3" /> All Agents
+        </Link>
+        
+        <div className="flex items-center gap-3 mb-2">
+          <div 
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0"
+            style={{ background: config.gradient }}
+          >
+            {AGENT_ICONS[config.icon]}
+          </div>
+          <div>
+            <h1 className="font-display text-xl font-bold">{config.name}</h1>
+            <p className="text-xs text-[var(--text-tertiary)] italic">&quot;{config.question}&quot;</p>
+          </div>
+        </div>
+        
+        <p className="text-sm text-[var(--text-secondary)] mb-6 leading-relaxed">
+          {config.description}
         </p>
 
+        {/* Input Tabs */}
         <div className="flex bg-[var(--bg-elevated)] p-1 rounded-lg mb-6 w-fit border border-[var(--border-subtle)]">
-          <button
-            onClick={() => setActiveTab('upload')}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'upload' ? 'bg-[var(--accent-analysis)]/20 text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
-          >
-            Upload File
-          </button>
-          <button
-            onClick={() => setActiveTab('text')}
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'text' ? 'bg-[var(--accent-analysis)]/20 text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
-          >
-            Paste Text or Link
-          </button>
+          {config.inputTypes.includes('file') && (
+            <button
+              onClick={() => setActiveTab('upload')}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'upload' ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+            >
+              Upload File
+            </button>
+          )}
+          {(config.inputTypes.includes('text') || config.inputTypes.includes('url')) && (
+            <button
+              onClick={() => setActiveTab('text')}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'text' ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+            >
+              {config.inputTypes.includes('url') ? 'Paste Text or Link' : 'Paste Text'}
+            </button>
+          )}
         </div>
 
-        {activeTab === 'upload' && !file && (
-          <FileUpload onFileSelect={handleAnalyze} isLoading={isAnalyzing} />
+        {/* Upload Tab */}
+        {activeTab === 'upload' && !file && !analysisResult && (
+          <div className="animate-fade-in">
+            <FileUpload onFileSelect={handleAnalyze} isLoading={isAnalyzing} />
+            <p className="text-xs text-[var(--text-tertiary)] mt-3 text-center">
+              {config.uploadLabel}
+            </p>
+          </div>
         )}
 
-        {activeTab === 'text' && !file && (
+        {/* Text Tab */}
+        {activeTab === 'text' && !file && !analysisResult && (
           <div className="flex flex-col gap-4 animate-fade-in">
             <textarea
-              className="w-full h-40 bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-lg p-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-analysis)] focus:ring-1 focus:ring-[var(--accent-analysis)] resize-none placeholder:text-[var(--text-tertiary)]"
-              placeholder="Paste a link to a product, copy-paste a contract, or write down a claim you want verified..."
+              className="w-full h-44 bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-lg p-4 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-1 resize-none placeholder:text-[var(--text-tertiary)]"
+              style={{ borderColor: isAnalyzing ? config.accentHex : undefined }}
+              placeholder={config.textPlaceholder}
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
               disabled={isAnalyzing}
@@ -160,163 +221,86 @@ export default function AnalyzeWorkspacePage({ params }: { params: Promise<{ age
               disabled={!textInput.trim() || isAnalyzing}
               isLoading={isAnalyzing}
             >
-              Analyze Input
+              Analyze with {config.name.replace(' Agent', '')}
             </Button>
           </div>
         )}
 
-        {(file || (textInput && analysisResult)) && (
-          <div className="bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-lg p-4 mb-6">
-            <div className="text-xs font-semibold text-[var(--text-tertiary)] mb-1 uppercase tracking-wider">Evidence Analyzed</div>
-            <div className="font-medium text-sm truncate">{file ? file.name : "Text Snippet"}</div>
-            
-            <div className="mt-4 pt-4 border-t border-[var(--border-subtle)]">
-              <div className="text-xs text-[var(--text-tertiary)] mb-1">Local Fingerprint (SHA-256)</div>
-              <div className="font-mono text-[10px] text-[var(--text-secondary)] break-all">{inputHash}</div>
+        {/* Examples */}
+        {!file && !analysisResult && !isAnalyzing && (
+          <div className="mt-6 pt-6 border-t border-[var(--border-subtle)]">
+            <div className="text-xs font-semibold text-[var(--text-tertiary)] mb-3 uppercase tracking-wider">Try analyzing</div>
+            <div className="space-y-2">
+              {config.examples.map((ex, i) => (
+                <div key={i} className="text-xs text-[var(--text-secondary)] bg-[var(--bg-base)] p-2.5 rounded-lg border border-[var(--border-subtle)]">
+                  • {ex}
+                </div>
+              ))}
             </div>
+          </div>
+        )}
 
-            <Button variant="ghost" className="w-full mt-4 bg-[var(--bg-elevated)] text-xs py-2" onClick={() => {
-              setFile(null);
-              setTextInput('');
-              setAnalysisResult(null);
-              setError(null);
-            }}>
+        {/* Evidence Summary (after analysis) */}
+        {(file || (textInput && analysisResult)) && (
+          <div className="bg-[var(--bg-base)] border border-[var(--border-subtle)] rounded-lg p-4 mb-6 animate-fade-in">
+            <div className="text-xs font-semibold text-[var(--text-tertiary)] mb-1 uppercase tracking-wider">Evidence Analyzed</div>
+            <div className="font-medium text-sm truncate">{file ? file.name : "Text Input"}</div>
+            
+            {inputHash && (
+              <div className="mt-4 pt-4 border-t border-[var(--border-subtle)]">
+                <div className="text-xs text-[var(--text-tertiary)] mb-1">Local Fingerprint (SHA-256)</div>
+                <div className="font-mono text-[10px] text-[var(--text-secondary)] break-all">{inputHash}</div>
+              </div>
+            )}
+
+            <Button variant="ghost" className="w-full mt-4 bg-[var(--bg-elevated)] text-xs py-2" onClick={handleReset}>
               Start Over
             </Button>
           </div>
         )}
       </div>
 
-      {/* RIGHT PANE: ANALYSIS */}
+      {/* RIGHT PANE: ANALYSIS RESULT */}
       <div className="flex-1 p-6 md:p-10 bg-[var(--bg-base)] lg:overflow-y-auto lg:h-[calc(100vh-64px)] relative min-w-0">
+        {/* Empty State */}
         {!isAnalyzing && !analysisResult && !error && (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-30">
             <Search className="w-16 h-16 mb-4" />
             <h3 className="text-xl font-medium">Awaiting Evidence</h3>
-            <p className="text-sm">Provide input on the left to begin analysis.</p>
+            <p className="text-sm">Provide input on the left to begin {config.name.replace(' Agent', '').toLowerCase()} analysis.</p>
           </div>
         )}
 
+        {/* Loading State */}
         {isAnalyzing && (
           <div className="h-full flex flex-col items-center justify-center">
-            <LoadingSpinner message="Extracting evidence and building analysis..." />
+            <LoadingSpinner message={`${config.name} is analyzing your evidence...`} />
           </div>
         )}
 
+        {/* Error State */}
         {error && (
           <div className="p-4 bg-[var(--status-risk-bg)] text-[var(--status-risk)] border border-[var(--status-risk)]/30 rounded-lg">
             {error}
           </div>
         )}
 
+        {/* Result — Agent-Specific Report */}
         {analysisResult && !isAnalyzing && (
-          <div className="animate-fade-in-up pb-20 max-w-4xl">
-            {/* Verdict Header */}
-            <div className={`p-6 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] mb-8 shadow-md`}>
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
-                <div>
-                  <div className="text-xs font-semibold text-[var(--text-tertiary)] mb-2 uppercase tracking-wider">AI Verdict</div>
-                  {/* @ts-ignore - The variant string is typed, but status is dynamic */}
-                  <Badge variant={getVerdictStatus(analysisResult.verdict)} className="text-xl md:text-2xl font-bold px-4 py-1.5">
-                    {analysisResult.verdict}
-                  </Badge>
-                </div>
-                <div className="sm:text-right">
-                  <div className="text-xs text-[var(--text-tertiary)] mb-1 uppercase tracking-wider">Confidence</div>
-                  <div className="text-xl md:text-2xl font-bold font-mono text-[var(--accent-analysis)]">{analysisResult.confidence}%</div>
-                </div>
-              </div>
-              <p className="text-sm md:text-base font-medium leading-relaxed">{analysisResult.summary}</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              {/* Positive Signals */}
-              <Card className="border-[var(--status-good)]/20 bg-[var(--status-good-bg)]/30">
-                <h3 className="text-sm font-semibold flex items-center gap-2 mb-4 text-[var(--status-good)]">
-                  <CheckCircle2 className="w-4 h-4" /> Positive Signals
-                </h3>
-                <ul className="space-y-2 text-sm text-[var(--text-secondary)]">
-                  {analysisResult.positiveSignals?.map((s: string, i: number) => <li key={i}>• {s}</li>)}
-                  {(!analysisResult.positiveSignals || analysisResult.positiveSignals.length === 0) && <li className="italic opacity-50">None identified</li>}
-                </ul>
-              </Card>
-
-              {/* Concerns */}
-              <Card className="border-[var(--status-risk)]/20 bg-[var(--status-risk-bg)]/30">
-                <h3 className="text-sm font-semibold flex items-center gap-2 mb-4 text-[var(--status-risk)]">
-                  <AlertTriangle className="w-4 h-4" /> Concerns
-                </h3>
-                <ul className="space-y-2 text-sm text-[var(--text-secondary)]">
-                  {analysisResult.concernSignals?.map((s: string, i: number) => <li key={i}>• {s}</li>)}
-                  {(!analysisResult.concernSignals || analysisResult.concernSignals.length === 0) && <li className="italic opacity-50">None identified</li>}
-                </ul>
-              </Card>
-            </div>
-
-            {/* Extracted Facts */}
-            <div className="mb-8">
-              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2 text-[var(--text-secondary)]">
-                <Search className="w-4 h-4" /> Extracted Facts
-              </h3>
-              <div className="bg-[var(--bg-surface)] rounded-lg p-4 text-sm border border-[var(--border-subtle)] space-y-2 text-[var(--text-secondary)]">
-                {analysisResult.extractedFacts?.map((f: string, i: number) => (
-                  <div key={i} className="pb-2 border-b border-[var(--border-subtle)] last:border-0 last:pb-0">{f}</div>
-                ))}
-              </div>
-            </div>
-
-            {/* Recommendations & Missing Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div>
-                <h3 className="text-sm font-semibold mb-4 flex items-center gap-2 text-[var(--accent-analysis)]">
-                  <Lightbulb className="w-4 h-4" /> Recommended Actions
-                </h3>
-                <ul className="space-y-2 text-sm">
-                  {analysisResult.recommendations?.map((r: string, i: number) => (
-                    <li key={i} className="flex gap-2 bg-[var(--bg-surface)] p-3 rounded-lg border border-[var(--border-subtle)] text-[var(--text-secondary)]">
-                      <ArrowRight className="w-4 h-4 shrink-0 mt-0.5 text-[var(--accent-analysis)]" /> {r}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-semibold mb-4 flex items-center gap-2 text-[var(--status-caution)]">
-                  <MessageSquareWarning className="w-4 h-4" /> Questions to Ask
-                </h3>
-                <ul className="space-y-2 text-sm">
-                  {analysisResult.questionsForUser?.map((q: string, i: number) => (
-                    <li key={i} className="flex gap-2 bg-[var(--bg-surface)] p-3 rounded-lg text-[var(--text-secondary)] border-l-2 border-[var(--status-caution)]">
-                      {q}
-                    </li>
-                  ))}
-                  {analysisResult.missingInformation?.map((m: string, i: number) => (
-                    <li key={`m${i}`} className="flex gap-2 bg-[var(--bg-surface)] p-3 rounded-lg text-[var(--text-secondary)] border-l-2 border-[var(--border-hover)] italic">
-                      Missing: {m}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            {/* Disclaimer */}
-            <div className="text-xs text-[var(--text-tertiary)] bg-[var(--bg-surface)] border border-[var(--border-subtle)] p-3 rounded-lg mb-8 flex gap-2 leading-relaxed">
-              <Info className="w-4 h-4 shrink-0" />
-              {analysisResult.disclaimer}
-            </div>
+          <>
+            <AgentReport agentType={agentId} result={analysisResult} />
 
             {/* Registration Panel */}
-            <div className="pt-8 border-t border-[var(--border-subtle)]">
+            <div className="pt-8 border-t border-[var(--border-subtle)] max-w-4xl">
               <RegistrationPanel 
                 contentHash={inputHash}
                 analysisHash={analysisResult._analysisHash || '0x0000000000000000000000000000000000000000000000000000000000000000'}
-                agentType={agentType}
-                title={file?.name || 'Untitled Analysis'}
+                agentType={agentId}
+                title={file?.name || 'Text Analysis'}
                 isDemoMode={!process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID}
               />
             </div>
-
-          </div>
+          </>
         )}
       </div>
     </div>

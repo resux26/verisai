@@ -35,7 +35,7 @@ export function VerificationResult({ isMatch, uploadedHash, registeredHash }: Ve
             </div>
             <h3 className="text-2xl font-bold text-color-error">DOES NOT MATCH</h3>
             <p className="text-sm text-text-primary max-w-md">
-              The uploaded file's fingerprint does not match the blockchain record. 
+              The uploaded file&apos;s fingerprint does not match the blockchain record. 
               This could mean the file was altered, or you uploaded the wrong file.
             </p>
           </>

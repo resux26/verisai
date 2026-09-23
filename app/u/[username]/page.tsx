@@ -1,77 +1,180 @@
 import { createClient } from '@/lib/database/supabase/server';
-import { Card } from '@/components/ui/Card';
 import { notFound } from 'next/navigation';
-import { ShieldCheck, Hexagon, User } from 'lucide-react';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Trophy, FileText, ShieldCheck, MapPin, Link as LinkIcon, Calendar, User as UserIcon, Search } from 'lucide-react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
 
-export default async function PublicProfilePage({ params }: { params: Promise<{ username: string }> }) {
-  const unwrappedParams = await params;
+export default async function PublicProfilePage({ params }: { params: { username: string } }) {
   const supabase = await createClient();
+  const username = params.username;
 
+  // 1. Fetch Profile and Reputation
   const { data: profile } = await supabase
     .from('profiles')
-    .select('*')
-    .eq('username', unwrappedParams.username)
+    .select('*, user_reputation(*)')
+    .eq('username', username)
     .single();
 
   if (!profile) {
     notFound();
   }
 
-  const { data: proofs } = await supabase
-    .from('proofs')
-    .select('*, analyses(title, agent_type, is_public)')
+  const rep = profile.user_reputation?.[0] || { total_points: 0, level_name: 'Explorer', analyses_count: 0, proofs_count: 0 };
+
+  // 2. Fetch Public Analyses
+  const { data: publicAnalyses } = await supabase
+    .from('analyses')
+    .select('id, title, agent_type, created_at, structured_result')
     .eq('user_id', profile.id)
+    .eq('is_public', true)
     .order('created_at', { ascending: false })
-    .limit(20);
-    
-  // Filter for only public analyses
-  const publicProofs = proofs?.filter(p => p.analyses?.is_public) || [];
+    .limit(10);
+
+  // 3. Fetch Public Templates
+  const { data: publicTemplates } = await supabase
+    .from('cv_templates')
+    .select('id, title, category, experience_level, download_count, view_count, created_at')
+    .eq('user_id', profile.id)
+    .eq('visibility', 'public')
+    .order('created_at', { ascending: false })
+    .limit(10);
 
   return (
-    <div className="section py-10 min-h-screen">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center gap-6 mb-12 animate-fade-in-up">
-          <div className="w-24 h-24 rounded-full bg-bg-elevated flex items-center justify-center overflow-hidden border border-border-default shadow-glow">
+    <div className="min-h-screen pb-20">
+      {/* Cover / Header Area */}
+      <div className="h-48 md:h-64 bg-gradient-to-br from-[var(--bg-elevated)] to-[#1a1b26] border-b border-[var(--border-subtle)] relative" />
+      
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative -mt-16 sm:-mt-24 mb-8 sm:mb-12 flex flex-col sm:flex-row gap-6 sm:items-end">
+          {/* Avatar */}
+          <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-[var(--bg-primary)] bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-4xl sm:text-5xl font-bold text-white shadow-xl shrink-0">
             {profile.avatar_url ? (
-              <img src={profile.avatar_url} alt={profile.full_name || profile.username} className="w-full h-full object-cover" />
+              <img src={profile.avatar_url} alt={profile.username} className="w-full h-full rounded-full object-cover" />
             ) : (
-              <User className="w-10 h-10 text-text-tertiary" />
+              profile.full_name?.substring(0, 2).toUpperCase() || 'U'
             )}
           </div>
-          <div>
-            <h1 className="text-3xl font-bold">{profile.full_name || profile.username}</h1>
-            <p className="text-accent-secondary mb-2">@{profile.username}</p>
-            {profile.bio && <p className="text-text-secondary text-sm max-w-lg">{profile.bio}</p>}
+
+          {/* User Info */}
+          <div className="flex-1 pb-2">
+            <h1 className="text-3xl font-bold flex items-center gap-3">
+              {profile.full_name}
+              
+            </h1>
+            <p className="text-[var(--text-secondary)] text-lg mb-4">@{profile.username}</p>
+            
+            <div className="flex flex-wrap gap-4 text-sm text-[var(--text-tertiary)]">
+              <div className="flex items-center gap-1.5">
+                <Calendar className="w-4 h-4" /> Joined {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              </div>
+            </div>
           </div>
+          
+          {/* Rank/Reputation Highlight */}
+          <Card className="!p-4 sm:!p-6 border-[var(--border-subtle)] bg-[var(--bg-surface)] shrink-0 w-full sm:w-auto text-center sm:text-right">
+            <div className="text-[10px] uppercase tracking-widest text-[var(--text-tertiary)] font-bold mb-1">Reputation</div>
+            <div className="text-3xl font-bold font-mono text-[var(--accent-analysis)] mb-1">
+              {rep.total_points.toLocaleString()}
+            </div>
+            <Badge variant="secondary" className="bg-[var(--bg-elevated)]">{rep.level_name}</Badge>
+          </Card>
         </div>
 
-        <h2 className="text-xl font-bold mb-6 flex items-center gap-2 border-b border-border-default pb-4">
-          <ShieldCheck className="w-5 h-5 text-accent-primary" /> Public Proofs
-        </h2>
+        {/* Bio if exists */}
+        {profile.bio && (
+          <div className="text-[var(--text-secondary)] max-w-3xl mb-10 text-lg leading-relaxed">
+            {profile.bio}
+          </div>
+        )}
 
-        <div className="grid gap-4">
-          {publicProofs.length === 0 && (
-            <div className="py-10 text-center border border-dashed border-border-default rounded-xl bg-bg-secondary text-text-secondary">
-              <Hexagon className="w-10 h-10 mx-auto mb-2 opacity-50" />
-              {profile.username} has no public proofs.
-            </div>
-          )}
-
-          {publicProofs.map((p: any) => (
-            <Card key={p.id} className="p-4 bg-bg-secondary border-border-default flex justify-between items-center hover:border-accent-primary/50 transition-colors">
-              <div>
-                <div className="font-bold">{p.analyses?.title}</div>
-                <div className="text-xs text-text-tertiary capitalize mt-1">
-                  {p.analyses?.agent_type} Agent • Proof #{p.proof_id_onchain}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Sidebar (Stats) */}
+          <div className="lg:col-span-1 space-y-6">
+            <Card className="!p-5 border-[var(--border-subtle)]">
+              <h3 className="font-bold mb-4 uppercase text-xs tracking-wider text-[var(--text-tertiary)]">Community Stats</h3>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center pb-4 border-b border-[var(--border-subtle)]">
+                  <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+                    <FileText className="w-4 h-4" /> Analyses
+                  </div>
+                  <div className="font-mono font-bold">{rep.analyses_count || 0}</div>
+                </div>
+                <div className="flex justify-between items-center pb-4 border-b border-[var(--border-subtle)]">
+                  <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+                    <ShieldCheck className="w-4 h-4" /> Verified Proofs
+                  </div>
+                  <div className="font-mono font-bold">{rep.proofs_count || 0}</div>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <div className="text-[10px] font-bold text-color-success bg-color-success-bg px-2 py-1 rounded inline-block h-min">ON-CHAIN</div>
-              </div>
             </Card>
-          ))}
+          </div>
+
+          {/* Main Content Area */}
+          <div className="lg:col-span-2 space-y-10">
+            
+            {/* Public Templates */}
+            <section>
+              <h2 className="text-xl font-bold mb-5 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-[var(--accent-analysis)]" />
+                Published CV Templates
+              </h2>
+              {(!publicTemplates || publicTemplates.length === 0) ? (
+                <div className="p-8 border-2 border-dashed border-[var(--border-subtle)] rounded-xl text-center text-[var(--text-tertiary)]">
+                  No public templates yet.
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {publicTemplates.map(t => (
+                    <Card key={t.id} className="!p-4 border-[var(--border-subtle)] hover:border-[var(--border-hover)] transition-colors">
+                      <Link href={`/career/templates/${t.id}`}>
+                        <div className="font-bold mb-1">{t.title}</div>
+                        <div className="text-xs text-[var(--text-secondary)] mb-3">{t.category} · {t.experience_level}</div>
+                        <div className="flex items-center gap-4 text-[11px] text-[var(--text-tertiary)]">
+                          <span>{t.download_count} downloads</span>
+                          <span>{t.view_count} views</span>
+                        </div>
+                      </Link>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* Public Analyses */}
+            <section>
+              <h2 className="text-xl font-bold mb-5 flex items-center gap-2">
+                <Search className="w-5 h-5 text-[var(--accent-proof)]" />
+                Public Analyses
+              </h2>
+              {(!publicAnalyses || publicAnalyses.length === 0) ? (
+                <div className="p-8 border-2 border-dashed border-[var(--border-subtle)] rounded-xl text-center text-[var(--text-tertiary)]">
+                  No public analyses shared yet.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {publicAnalyses.map(a => (
+                    <Card key={a.id} className="!p-4 border-[var(--border-subtle)] hover:border-[var(--border-hover)] transition-colors">
+                      <Link href={`/verify/${a.id}`}>
+                        <div className="flex justify-between items-start mb-1">
+                          <div className="font-bold text-sm">{a.title}</div>
+                          {a.structured_result?.confidence != null && (
+                            <span className="text-xs font-mono font-bold text-[var(--accent-analysis)]">
+                              {a.structured_result.confidence}%
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-[var(--text-secondary)] capitalize">
+                          {a.agent_type} Agent · {new Date(a.created_at).toLocaleDateString()}
+                        </div>
+                      </Link>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </section>
+
+          </div>
         </div>
       </div>
     </div>

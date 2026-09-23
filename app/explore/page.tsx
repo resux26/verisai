@@ -2,119 +2,151 @@ import { createClient } from '@/lib/database/supabase/server';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { ShieldCheck, ExternalLink, Hexagon } from 'lucide-react';
+import { ShieldCheck, ExternalLink, Search, Globe } from 'lucide-react';
 import Link from 'next/link';
+import { AGENT_CONFIGS, type AgentId } from '@/lib/agents/config';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Explore Proofs | Crexto AI',
+  description: 'Publicly verified cryptographic records registered on Base Sepolia by the Crexto community.',
+};
 
 export default async function ExplorePage() {
   const supabase = await createClient();
 
-  const isDemo = !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith('http');
-  
-  let proofs = [];
+  let proofs: any[] = [];
 
-  if (!isDemo) {
+  try {
     const { data } = await supabase
       .from('proofs')
       .select('*, analyses(title, agent_type)')
       .order('created_at', { ascending: false })
-      .limit(20);
+      .limit(30);
     proofs = data || [];
+  } catch (e) {
+    // DB may not be fully set up
   }
 
   return (
     <div className="section py-10 min-h-screen">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-10 border-b border-[var(--border-subtle)] pb-6 animate-fade-in-up">
         <div>
-          <h1 className="font-display text-3xl font-bold mb-2">Explore Proofs</h1>
+          <h1 className="font-display text-3xl font-bold mb-2 flex items-center gap-3">
+            <Globe className="w-7 h-7 text-[var(--accent-proof)]" />
+            Explore Proofs
+          </h1>
           <p className="text-[var(--text-secondary)]">
             Publicly verified cryptographic records registered on Base Sepolia.
           </p>
         </div>
+        <Link href="/verify">
+          <Button variant="secondary">Verify a Proof</Button>
+        </Link>
       </div>
 
-      <div className="grid gap-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-        {isDemo && (
-          <Card className="p-6 border-[var(--border-subtle)]">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
-              <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[var(--status-good-bg)] flex items-center justify-center shrink-0">
-                  <ShieldCheck className="w-6 h-6 text-[var(--status-good)]" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold">Demo Public Analysis</h3>
-                  <div className="text-sm text-[var(--text-secondary)] mt-1">Trust Agent · Verified 5 hours ago</div>
-                </div>
-              </div>
-              <div className="sm:text-right shrink-0">
-                <div className="text-xs text-[var(--text-tertiary)] mb-1">Status</div>
-                <Badge variant="verified">On-chain</Badge>
-              </div>
+      <div className="grid md:grid-cols-2 gap-4 mb-10 animate-fade-in-up" style={{ animationDelay: '0.05s' }}>
+        <Link href="/leaderboard" className="group">
+          <Card className="!p-4 border-[var(--border-subtle)] hover:border-[var(--accent-analysis)]/50 transition-colors bg-[var(--bg-elevated)] flex items-center gap-4">
+            <div className="w-10 h-10 rounded-lg bg-yellow-500/10 text-yellow-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <ShieldCheck className="w-5 h-5" />
             </div>
-            
-            <div className="bg-[var(--bg-base)] p-4 rounded-lg border border-[var(--border-subtle)] mb-4 grid sm:grid-cols-2 gap-4 text-xs font-mono">
-              <div>
-                <span className="text-[var(--text-tertiary)] block mb-1">Proof ID</span>
-                <span className="text-[var(--accent-proof)]">#10285</span>
-              </div>
-              <div>
-                <span className="text-[var(--text-tertiary)] block mb-1">Transaction</span>
-                <span className="text-[var(--text-secondary)] truncate block">0x5b3c2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z</span>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-4">
-              <Button size="sm">View Record</Button>
+            <div>
+              <div className="font-bold text-sm">Community Leaderboard</div>
+              <div className="text-xs text-[var(--text-tertiary)]">Discover top contributors</div>
             </div>
           </Card>
-        )}
+        </Link>
+        <Link href="/career/templates" className="group">
+          <Card className="!p-4 border-[var(--border-subtle)] hover:border-[var(--accent-analysis)]/50 transition-colors bg-[var(--bg-elevated)] flex items-center gap-4">
+            <div className="w-10 h-10 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Globe className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="font-bold text-sm">Career Templates</div>
+              <div className="text-xs text-[var(--text-tertiary)]">Browse CV & Resume formats</div>
+            </div>
+          </Card>
+        </Link>
+      </div>
 
-        {!isDemo && proofs.length === 0 && (
+      <div className="mb-6 flex items-center gap-2 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+        <h2 className="text-xl font-bold">Recent Proofs</h2>
+      </div>
+
+      <div className="grid gap-4 animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
+        {proofs.length === 0 && (
           <div className="py-20 text-center border-2 border-dashed border-[var(--border-subtle)] rounded-xl bg-[var(--bg-surface)] flex flex-col items-center justify-center">
-            <Hexagon className="w-16 h-16 text-[var(--text-tertiary)] mb-4 opacity-50" />
-            <h3 className="text-xl font-bold mb-2">No Public Proofs</h3>
-            <p className="text-[var(--text-secondary)] mb-6">There are no proofs registered on the network yet.</p>
-            <Link href="/agents"><Button>Be the first</Button></Link>
+            <ShieldCheck className="w-16 h-16 text-[var(--text-tertiary)] mb-4 opacity-30" />
+            <h3 className="text-xl font-bold mb-2">No Public Proofs Yet</h3>
+            <p className="text-[var(--text-secondary)] mb-2 max-w-md mx-auto">
+              The Crexto verification network is just getting started. Run an AI analysis and register the first on-chain proof.
+            </p>
+            <p className="text-xs text-[var(--text-tertiary)] mb-6">
+              Proofs appear here once they are anchored on the blockchain.
+            </p>
+            <Link href="/agents"><Button>Be the First</Button></Link>
           </div>
         )}
 
-        {!isDemo && proofs.map((p: any) => (
-           <Card key={p.id} className="p-6 border-[var(--border-subtle)]">
-           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
-             <div className="flex gap-4">
-               <div className="w-12 h-12 rounded-xl bg-[var(--status-good-bg)] flex items-center justify-center shrink-0">
-                 <ShieldCheck className="w-6 h-6 text-[var(--status-good)]" />
-               </div>
-               <div>
-                 <h3 className="text-lg font-bold">{p.analyses?.title || 'Unknown Analysis'}</h3>
-                 <div className="text-sm text-[var(--text-secondary)] mt-1 capitalize">{p.analyses?.agent_type || 'Custom'} Agent · Verified {new Date(p.created_at).toLocaleDateString()}</div>
-               </div>
-             </div>
-             <div className="sm:text-right shrink-0">
-               <div className="text-xs text-[var(--text-tertiary)] mb-1">Status</div>
-               <Badge variant="verified">On-chain</Badge>
-             </div>
-           </div>
-           
-           <div className="bg-[var(--bg-base)] p-4 rounded-lg border border-[var(--border-subtle)] mb-4 grid sm:grid-cols-2 gap-4 text-xs font-mono">
-             <div>
-               <span className="text-[var(--text-tertiary)] block mb-1">Proof ID</span>
-               <span className="text-[var(--accent-proof)]">#{p.proof_id_onchain}</span>
-             </div>
-             <div>
-               <span className="text-[var(--text-tertiary)] block mb-1">Transaction</span>
-               <span className="text-[var(--text-secondary)] truncate block">{p.transaction_hash}</span>
-             </div>
-           </div>
+        {proofs.map((p: any) => {
+          const agentType = p.analyses?.agent_type as AgentId | undefined;
+          const agentConfig = agentType ? AGENT_CONFIGS[agentType] : null;
+          
+          return (
+            <Card key={p.id} className="!p-5 border-[var(--border-subtle)] hover:border-[var(--border-hover)] transition-colors">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
+                <div className="flex gap-4">
+                  <div 
+                    className="w-11 h-11 rounded-xl flex items-center justify-center text-white shrink-0"
+                    style={{ background: agentConfig?.gradient || 'linear-gradient(135deg, #6B7280, #4B5563)' }}
+                  >
+                    <ShieldCheck className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold">{p.analyses?.title || 'Untitled Analysis'}</h3>
+                    <div className="text-xs text-[var(--text-tertiary)] mt-0.5 capitalize">
+                      {agentType || 'Custom'} Agent · {new Date(p.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+                <Badge variant="verified" className="shrink-0">On-Chain</Badge>
+              </div>
+              
+              <div className="bg-[var(--bg-base)] p-3 rounded-lg border border-[var(--border-subtle)] grid sm:grid-cols-2 gap-3 text-xs font-mono mb-4">
+                <div>
+                  <span className="text-[var(--text-tertiary)] block mb-0.5">Proof ID</span>
+                  <span className="text-[var(--accent-proof)] font-bold">#{p.proof_id_onchain}</span>
+                </div>
+                <div>
+                  <span className="text-[var(--text-tertiary)] block mb-0.5">Transaction</span>
+                  <span className="text-[var(--text-secondary)] truncate block">{p.transaction_hash}</span>
+                </div>
+              </div>
 
-           <div className="flex justify-end gap-4">
-             <Button variant="ghost" size="sm" asChild>
-               <a href={`https://sepolia.basescan.org/tx/${p.transaction_hash}`} target="_blank" rel="noopener noreferrer">
-                 Explorer <ExternalLink className="ml-2 w-4 h-4" />
-               </a>
-             </Button>
-           </div>
-         </Card>
-        ))}
+              <div className="flex justify-end gap-3">
+                {p.transaction_hash && (
+                  <a 
+                    href={`https://sepolia.basescan.org/tx/${p.transaction_hash}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                  >
+                    Explorer <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+                {p.proof_id_onchain && (
+                  <Link 
+                    href={`/verify/${p.proof_id_onchain}`}
+                    className="flex items-center gap-1.5 text-xs text-[var(--accent-proof)] hover:underline"
+                  >
+                    <Search className="w-3 h-3" /> Verify
+                  </Link>
+                )}
+              </div>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

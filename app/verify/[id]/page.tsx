@@ -33,6 +33,7 @@ export default function VerifyProofPage({ params }: { params: Promise<{ id: stri
     // If we have on-chain data, use it
     if (onChainProof && Array.isArray(onChainProof) && onChainProof.length >= 7) {
       // Wagmi returns tuple as array
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setProofData({
         id: onChainProof[0].toString(),
         owner: onChainProof[1],
@@ -110,7 +111,7 @@ export default function VerifyProofPage({ params }: { params: Promise<{ id: stri
             <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3">
               Proof #{proofId}
               <Badge variant="verified">Verified on-chain</Badge>
-              {isDemo && <Badge variant="demo">Demo Data</Badge>}
+              
             </h1>
           </div>
         </div>

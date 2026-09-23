@@ -1,6 +1,6 @@
 import React from 'react';
 
-type BadgeVariant = 'verified' | 'pending' | 'error' | 'demo' | 'accent' | 'proof' | 'good' | 'caution' | 'risk' | 'default';
+type BadgeVariant = 'verified' | 'pending' | 'error' | 'demo' | 'accent' | 'proof' | 'good' | 'caution' | 'risk' | 'default' | 'secondary' | 'outline';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: BadgeVariant;
