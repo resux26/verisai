@@ -23,11 +23,9 @@ export default function NewTemplatePage() {
     const description = formData.get('description') as string;
 
     try {
-      // Direct call to an API route to handle the upload
       const res = await fetch('/api/career/templates/upload', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, category, description })
+        body: formData, // Send the FormData directly
       });
       
       const data = await res.json();
@@ -104,11 +102,22 @@ export default function NewTemplatePage() {
               />
             </div>
 
-            <div className="p-6 border-2 border-dashed border-[var(--border-subtle)] rounded-lg text-center bg-[var(--bg-base)] hover:border-[var(--text-primary)] transition-colors cursor-pointer">
-              <Upload className="w-8 h-8 text-[var(--text-tertiary)] mx-auto mb-2" />
-              <div className="text-sm font-bold mb-1">Click to upload template file</div>
-              <div className="text-xs text-[var(--text-tertiary)]">PDF, DOCX, or Figma Link (Max 5MB)</div>
-              {/* Note: File upload input is hidden for this mock implementation */}
+            <div className="relative p-6 border-2 border-dashed border-[var(--border-subtle)] rounded-lg text-center bg-[var(--bg-base)] hover:border-[var(--text-primary)] transition-colors cursor-pointer group overflow-hidden">
+              <input 
+                type="file" 
+                name="file" 
+                accept=".pdf,.doc,.docx" 
+                required 
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                onChange={(e) => {
+                  const fileName = e.target.files?.[0]?.name;
+                  const label = document.getElementById('file-label');
+                  if (label && fileName) label.innerText = fileName;
+                }}
+              />
+              <Upload className="w-8 h-8 text-[var(--text-tertiary)] mx-auto mb-2 group-hover:text-[var(--text-primary)] transition-colors" />
+              <div id="file-label" className="text-sm font-bold mb-1">Click to upload template file</div>
+              <div className="text-xs text-[var(--text-tertiary)]">PDF, DOCX (Max 5MB)</div>
             </div>
 
             <Button 
