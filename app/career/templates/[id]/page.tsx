@@ -19,11 +19,15 @@ export default async function TemplateDetailPage({ params }: { params: { id: str
   const supabase = await createClient();
 
   // 1. Fetch Template
-  const { data: template } = await supabase
+  const { data: template, error } = await supabase
     .from('cv_templates')
-    .select('*, profiles(username, full_name, avatar_url, is_demo)')
+    .select('*, profiles(username, full_name, avatar_url)')
     .eq('id', params.id)
     .single();
+
+  if (error) {
+    console.error('Error fetching template details:', error);
+  }
 
   if (!template) {
     notFound();
