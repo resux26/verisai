@@ -4,10 +4,11 @@ import { Mail, MapPin, Phone } from 'lucide-react';
 
 interface CVPreviewProps {
   data: any;
+  photoURL?: string | null;
 }
 
 export const CVPreview = forwardRef<HTMLDivElement, CVPreviewProps>(
-  ({ data }, ref) => {
+  ({ data, photoURL }, ref) => {
     if (!data) return null;
 
     return (
@@ -18,25 +19,36 @@ export const CVPreview = forwardRef<HTMLDivElement, CVPreviewProps>(
       >
         {/* Header */}
         <div className="border-b-2 border-gray-900 pb-6 mb-6">
-          <h1 className="text-3xl font-bold uppercase tracking-tight text-gray-900 mb-2">{data.name}</h1>
-          <h2 className="text-xl text-gray-600 font-medium mb-4">{data.title}</h2>
-          
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-600">
-            {data.location && (
-              <div className="flex items-center gap-1.5">
-                <MapPin className="w-4 h-4" /> {data.location}
-              </div>
+          <div className="flex items-start gap-6">
+            {photoURL && (
+              <img 
+                src={photoURL} 
+                alt={data.name} 
+                className="w-24 h-24 rounded-full object-cover border-2 border-gray-200 shrink-0 print:w-20 print:h-20" 
+              />
             )}
-            {data.email && (
-              <div className="flex items-center gap-1.5">
-                <Mail className="w-4 h-4" /> {data.email}
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold uppercase tracking-tight text-gray-900 mb-2">{data.name}</h1>
+              <h2 className="text-xl text-gray-600 font-medium mb-4">{data.title}</h2>
+              
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-600">
+                {data.location && (
+                  <div className="flex items-center gap-1.5">
+                    <MapPin className="w-4 h-4" /> {data.location}
+                  </div>
+                )}
+                {data.email && (
+                  <div className="flex items-center gap-1.5">
+                    <Mail className="w-4 h-4" /> {data.email}
+                  </div>
+                )}
+                {data.phone && (
+                  <div className="flex items-center gap-1.5">
+                    <Phone className="w-4 h-4" /> {data.phone}
+                  </div>
+                )}
               </div>
-            )}
-            {data.phone && (
-              <div className="flex items-center gap-1.5">
-                <Phone className="w-4 h-4" /> {data.phone}
-              </div>
-            )}
+            </div>
           </div>
         </div>
 

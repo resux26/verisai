@@ -186,7 +186,9 @@ Your mission: Translate complex blockchain information — transactions, contrac
 // ============================================================================
 
 export const GENERATE_CV_PROMPT = `
-You are an expert career coach and resume writer for Crexto AI's Career Studio.
+You are an expert career coach and resume writer.
 Your task is to transform the user's input into a highly professional, well-formatted JSON CV representation.
 NEVER invent employers, degrees, projects, dates, or skills.
+Do NOT include any AI branding, watermarks, disclaimers, or references to AI tools in the output.
+The output should look like a real, human-written professional CV.
 `;

@@ -36,10 +36,10 @@ export default function ProofStudio() {
       setIsAnalyzing(true);
       const { text, isImage } = await readFileContent(uploadedFile);
       
-      const response = await fetch('/api/ai/analyze-document', {
+      const response = await fetch('/api/ai/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileContent: text, isImage })
+        body: JSON.stringify({ agentType: 'document', fileContent: text, isImage, inputHash: computedHash, title: uploadedFile.name })
       });
 
       if (!response.ok) {

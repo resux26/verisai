@@ -14,6 +14,7 @@ export default function CareerStudio() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDemoMode, setIsDemoMode] = useState(false);
+  const [photoURL, setPhotoURL] = useState<string | null>(null);
   
   const cvRef = useRef<HTMLDivElement>(null);
 
@@ -84,6 +85,42 @@ export default function CareerStudio() {
         <div className="lg:col-span-5 flex flex-col gap-6 no-print">
           <NaturalLanguageInput onSubmit={handleGenerate} isLoading={isGenerating} />
           
+          {/* Photo Upload */}
+          <Card className="flex flex-col gap-4 border-[var(--border-subtle)]">
+            <h3 className="font-semibold text-sm">Profile Photo (Optional)</h3>
+            <div className="flex items-center gap-4">
+              {photoURL ? (
+                <img src={photoURL} alt="Profile" className="w-16 h-16 rounded-full object-cover border-2 border-[var(--border-subtle)]" />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-[var(--bg-base)] border-2 border-dashed border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] text-xs">
+                  No photo
+                </div>
+              )}
+              <div className="flex flex-col gap-2">
+                <label className="cursor-pointer text-sm font-medium text-[#A855F7] hover:underline">
+                  {photoURL ? 'Change Photo' : 'Upload Photo'}
+                  <input 
+                    type="file" 
+                    accept="image/png, image/jpeg, image/webp" 
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const url = URL.createObjectURL(file);
+                        setPhotoURL(url);
+                      }
+                    }}
+                  />
+                </label>
+                {photoURL && (
+                  <button onClick={() => setPhotoURL(null)} className="text-xs text-[var(--text-tertiary)] hover:text-red-400">
+                    Remove
+                  </button>
+                )}
+              </div>
+            </div>
+          </Card>
+          
           {error && (
             <div className="p-4 bg-[var(--status-risk-bg)] text-[var(--status-risk)] rounded-lg border border-[var(--status-risk)]/20 text-sm">
               {error}
@@ -134,7 +171,7 @@ export default function CareerStudio() {
             </Card>
           ) : cvData ? (
             <div className="bg-white p-2 sm:p-4 rounded-xl shadow-lg overflow-hidden print:p-0 print:shadow-none print:bg-transparent">
-              <CVPreview data={cvData} ref={cvRef} />
+              <CVPreview data={cvData} photoURL={photoURL} ref={cvRef} />
             </div>
           ) : (
             <Card className="h-full min-h-[600px] flex flex-col items-center justify-center border-dashed text-[var(--text-tertiary)] bg-[var(--bg-base)]">

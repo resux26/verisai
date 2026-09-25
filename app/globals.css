@@ -393,10 +393,35 @@ body {
    ══════════════════════════════════════════ */
 
 @media print {
-  body { background: white !important; color: black !important; }
-  .no-print { display: none !important; }
-  .glass-card, .glass-card-static, .glass-card-interactive { background: white !important; border: 1px solid #ddd !important; box-shadow: none !important; }
+  body { background: white !important; color: black !important; margin: 0 !important; padding: 0 !important; }
+  
+  /* Hide everything that's not the CV */
+  .no-print,
+  header, footer, nav,
+  [class*="no-print"] { display: none !important; }
+
+  /* Hide the left column (input panel / actions) */
+  .lg\:col-span-5 { display: none !important; }
+  
+  /* Make the CV column full width */
+  .lg\:col-span-7 { 
+    grid-column: 1 / -1 !important; 
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Clean up the CV card */
+  .glass-card, .glass-card-static, .glass-card-interactive { 
+    background: white !important; 
+    border: none !important; 
+    box-shadow: none !important; 
+    padding: 0 !important;
+  }
   .gradient-text { -webkit-text-fill-color: #333 !important; }
+  
+  /* Remove outer wrappers padding */
+  .section { padding: 0 !important; }
+  main { padding: 0 !important; }
 }
 
 /* ══════════════════════════════════════════
