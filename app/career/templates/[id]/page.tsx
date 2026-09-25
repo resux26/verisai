@@ -27,10 +27,11 @@ export default async function TemplateDetailPage({ params }: { params: { id: str
 
   if (error) {
     console.error('Error fetching template details:', error);
+    throw new Error(`Database error: ${error.message || JSON.stringify(error)}`);
   }
 
   if (!template) {
-    notFound();
+    throw new Error(`Template not found in DB for ID: ${params.id}`);
   }
 
   // 2. Increment view count (if we had a mutation for it, or just RPC. Skipping for simple read in MVP)

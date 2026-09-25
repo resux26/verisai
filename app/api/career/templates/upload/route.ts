@@ -41,6 +41,7 @@ export async function POST(req: Request) {
         filePath = publicUrlData.publicUrl;
       } else if (uploadError) {
         console.error('Storage upload error:', uploadError);
+        return NextResponse.json({ error: `Storage Error (File): ${uploadError.message}. Did you create the 'cv_templates' bucket?` }, { status: 500 });
       }
 
       // Handle optional preview image
@@ -55,10 +56,12 @@ export async function POST(req: Request) {
           previewPath = previewUrlData.publicUrl;
         } else if (previewError) {
           console.error('Preview upload error:', previewError);
+          return NextResponse.json({ error: `Storage Error (Preview): ${previewError.message}. Did you create the 'cv_templates' bucket?` }, { status: 500 });
         }
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error('Storage upload exception:', e);
+      return NextResponse.json({ error: `Storage Exception: ${e.message}` }, { status: 500 });
     }
 
     // Insert template
