@@ -16,6 +16,7 @@ export async function POST(req: Request) {
     const category = formData.get('category') as string;
     const description = formData.get('description') as string;
     const file = formData.get('file') as File | null;
+    const preview = formData.get('preview') as File | null;
 
     if (!title || !category || !file) {
       return NextResponse.json({ error: 'Missing required fields or file' }, { status: 400 });
@@ -26,6 +27,7 @@ export async function POST(req: Request) {
     let filePath = `demo/${file.name}`;
     let fileType = file.type;
     let fileSize = file.size;
+    let previewPath = null;
 
     try {
       const fileName = `${user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
@@ -34,10 +36,26 @@ export async function POST(req: Request) {
         .upload(fileName, file);
 
       if (uploadData) {
-        filePath = uploadData.path;
+        // Construct the public URL for the file
+        const { data: publicUrlData } = supabase.storage.from('cv_templates').getPublicUrl(uploadData.path);
+        filePath = publicUrlData.publicUrl;
       } else if (uploadError) {
         console.error('Storage upload error:', uploadError);
-        // Continue with demo path if bucket missing
+      }
+
+      // Handle optional preview image
+      if (preview) {
+        const previewName = `${user.id}/preview-${Date.now()}-${preview.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        const { data: previewData, error: previewError } = await supabase.storage
+          .from('cv_templates')
+          .upload(previewName, preview);
+          
+        if (previewData) {
+          const { data: previewUrlData } = supabase.storage.from('cv_templates').getPublicUrl(previewData.path);
+          previewPath = previewUrlData.publicUrl;
+        } else if (previewError) {
+          console.error('Preview upload error:', previewError);
+        }
       }
     } catch (e) {
       console.error('Storage upload exception:', e);
@@ -52,6 +70,7 @@ export async function POST(req: Request) {
         category,
         description,
         file_path: filePath,
+        preview_path: previewPath,
         file_type: fileType,
         file_size: fileSize,
         visibility: 'public', // default to public to show in gallery

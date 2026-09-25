@@ -102,22 +102,41 @@ export default function NewTemplatePage() {
               />
             </div>
 
-            <div className="relative p-6 border-2 border-dashed border-[var(--border-subtle)] rounded-lg text-center bg-[var(--bg-base)] hover:border-[var(--text-primary)] transition-colors cursor-pointer group overflow-hidden">
-              <input 
-                type="file" 
-                name="file" 
-                accept=".pdf,.doc,.docx" 
-                required 
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                onChange={(e) => {
-                  const fileName = e.target.files?.[0]?.name;
-                  const label = document.getElementById('file-label');
-                  if (label && fileName) label.innerText = fileName;
-                }}
-              />
-              <Upload className="w-8 h-8 text-[var(--text-tertiary)] mx-auto mb-2 group-hover:text-[var(--text-primary)] transition-colors" />
-              <div id="file-label" className="text-sm font-bold mb-1">Click to upload template file</div>
-              <div className="text-xs text-[var(--text-tertiary)]">PDF, DOCX (Max 5MB)</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="relative p-6 border-2 border-dashed border-[var(--border-subtle)] rounded-lg text-center bg-[var(--bg-base)] hover:border-[var(--text-primary)] transition-colors cursor-pointer group overflow-hidden">
+                <input 
+                  type="file" 
+                  name="file" 
+                  accept=".pdf,.doc,.docx" 
+                  required 
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  onChange={(e) => {
+                    const fileName = e.target.files?.[0]?.name;
+                    const label = document.getElementById('file-label');
+                    if (label && fileName) label.innerText = fileName;
+                  }}
+                />
+                <Upload className="w-8 h-8 text-[var(--text-tertiary)] mx-auto mb-2 group-hover:text-[var(--text-primary)] transition-colors" />
+                <div id="file-label" className="text-sm font-bold mb-1">Upload template file *</div>
+                <div className="text-xs text-[var(--text-tertiary)]">PDF, DOCX (Max 5MB)</div>
+              </div>
+
+              <div className="relative p-6 border-2 border-dashed border-[var(--border-subtle)] rounded-lg text-center bg-[var(--bg-base)] hover:border-[var(--text-primary)] transition-colors cursor-pointer group overflow-hidden">
+                <input 
+                  type="file" 
+                  name="preview" 
+                  accept="image/png, image/jpeg, image/webp" 
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  onChange={(e) => {
+                    const fileName = e.target.files?.[0]?.name;
+                    const label = document.getElementById('preview-label');
+                    if (label && fileName) label.innerText = fileName;
+                  }}
+                />
+                <Upload className="w-8 h-8 text-[var(--text-tertiary)] mx-auto mb-2 group-hover:text-[var(--text-primary)] transition-colors" />
+                <div id="preview-label" className="text-sm font-bold mb-1">Upload preview image (Optional)</div>
+                <div className="text-xs text-[var(--text-tertiary)]">PNG, JPG (Max 2MB)</div>
+              </div>
             </div>
 
             <Button 
