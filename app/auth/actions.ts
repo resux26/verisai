@@ -56,7 +56,7 @@ export async function signInWithGoogle() {
     redirect('/login?error=Configuration missing. Please set up Supabase keys.')
   }
 
-  const origin = (await headers()).get('origin')
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || (await headers()).get('origin') || 'https://www.crexto.com'
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
