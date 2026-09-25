@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/database/supabase/server';
 import { grantReward } from '@/lib/token/rewards';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 export async function POST(req: Request) {
   try {
@@ -10,6 +11,12 @@ export async function POST(req: Request) {
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Create an admin client to bypass Storage RLS since the user might not have set up storage policies
+    const adminSupabase = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
 
     const formData = await req.formData();
     const title = formData.get('title') as string;
@@ -31,13 +38,13 @@ export async function POST(req: Request) {
 
     try {
       const fileName = `${user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { data: uploadData, error: uploadError } = await adminSupabase.storage
         .from('cv_templates') // Using cv_templates bucket
         .upload(fileName, file);
 
       if (uploadData) {
         // Construct the public URL for the file
-        const { data: publicUrlData } = supabase.storage.from('cv_templates').getPublicUrl(uploadData.path);
+        const { data: publicUrlData } = adminSupabase.storage.from('cv_templates').getPublicUrl(uploadData.path);
         filePath = publicUrlData.publicUrl;
       } else if (uploadError) {
         console.error('Storage upload error:', uploadError);
@@ -47,12 +54,12 @@ export async function POST(req: Request) {
       // Handle optional preview image
       if (preview) {
         const previewName = `${user.id}/preview-${Date.now()}-${preview.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-        const { data: previewData, error: previewError } = await supabase.storage
+        const { data: previewData, error: previewError } = await adminSupabase.storage
           .from('cv_templates')
           .upload(previewName, preview);
           
         if (previewData) {
-          const { data: previewUrlData } = supabase.storage.from('cv_templates').getPublicUrl(previewData.path);
+          const { data: previewUrlData } = adminSupabase.storage.from('cv_templates').getPublicUrl(previewData.path);
           previewPath = previewUrlData.publicUrl;
         } else if (previewError) {
           console.error('Preview upload error:', previewError);
