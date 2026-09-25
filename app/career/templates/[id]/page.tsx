@@ -26,12 +26,21 @@ export default async function TemplateDetailPage({ params }: { params: { id: str
     .single();
 
   if (error) {
-    console.error('Error fetching template details:', error);
-    throw new Error(`Database error: ${error.message || JSON.stringify(error)}`);
+    return (
+      <div className="p-10 text-center text-red-500 font-mono">
+        <h1 className="text-2xl font-bold mb-4">Database Error</h1>
+        <p>{error.message || JSON.stringify(error)}</p>
+      </div>
+    );
   }
 
   if (!template) {
-    throw new Error(`Template not found in DB for ID: ${params.id}`);
+    return (
+      <div className="p-10 text-center font-mono">
+        <h1 className="text-2xl font-bold mb-4">Template Not Found</h1>
+        <p>No template found for ID: {params.id}</p>
+      </div>
+    );
   }
 
   // 2. Increment view count (if we had a mutation for it, or just RPC. Skipping for simple read in MVP)
