@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/Button';
 import { Download, FileText, Share2, Tag, Calendar, User as UserIcon, BarChart } from 'lucide-react';
 import Link from 'next/link';
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
+export async function generateMetadata(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const supabase = await createClient();
   const { data } = await supabase.from('cv_templates').select('title, description').eq('id', params.id).single();
   return {
@@ -15,7 +16,8 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   };
 }
 
-export default async function TemplateDetailPage({ params }: { params: { id: string } }) {
+export default async function TemplateDetailPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const supabase = await createClient();
 
   // 1. Fetch Template
