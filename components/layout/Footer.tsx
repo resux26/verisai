@@ -66,7 +66,10 @@ export function Footer() {
 
         {/* Investors & Partners */}
         <div className="mb-12 pt-8 border-t border-[var(--border-subtle)]">
-          <h4 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-5 text-center">Investors & Partners</h4>
+          <h4 className="text-sm font-semibold text-[var(--text-primary)] tracking-wider mb-2 text-center">🏦 Investors & Partners</h4>
+          <p className="text-xs text-[var(--text-tertiary)] text-center max-w-2xl mx-auto mb-6 leading-relaxed">
+            Crexto is backed by leading Web3 names and investors, including trusted partners from across the blockchain and venture capital ecosystem.
+          </p>
           <div className="flex flex-wrap justify-center gap-2.5">
             {[
               'KuCoin',
@@ -77,6 +80,16 @@ export function Footer() {
               'Backed VC',
               'Skyland Ventures',
               'B Strategy',
+              'MetalphaPro',
+              'Ventures HTX',
+              'tbvxyz',
+              'Ledger Capital',
+              'FDES',
+              'Bitverse',
+              'SeaFi',
+              'SYNBO Protocol',
+              'BSClaunch',
+              'Mario Nawfal',
             ].map((partner) => (
               <span
                 key={partner}
