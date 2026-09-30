@@ -52,6 +52,7 @@ export function Footer() {
             <h4 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-4">Company</h4>
             <ul className="space-y-2.5">
               <li><Link href="/about" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">About</Link></li>
+              <li><Link href="/docs" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">Docs</Link></li>
               <li>
                 <a href="https://sepolia.basescan.org" target="_blank" rel="noopener noreferrer" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
                   Base Explorer ↗
@@ -60,6 +61,33 @@ export function Footer() {
               <li><Link href="/login" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">Sign In</Link></li>
               <li><Link href="/register" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">Create Account</Link></li>
             </ul>
+          </div>
+        </div>
+
+        {/* Investors & Partners */}
+        <div className="mb-12 pt-8 border-t border-[var(--border-subtle)]">
+          <h4 className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-5 text-center">Investors & Partners</h4>
+          <div className="flex flex-wrap justify-center gap-2.5">
+            {[
+              'KuCoin',
+              'Zealy',
+              'Vantec Angel Network',
+              'Mantella Venture Partners',
+              'Inovia Capital',
+              'Backed VC',
+              'Skyland Ventures',
+              'B Strategy',
+            ].map((partner) => (
+              <span
+                key={partner}
+                className="px-4 py-1.5 text-xs font-medium rounded-full border border-[var(--border-subtle)] bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent-analysis)]/40 hover:bg-[var(--accent-analysis-dim)] transition-all duration-200 cursor-default"
+              >
+                {partner}
+              </span>
+            ))}
+            <span className="px-4 py-1.5 text-xs font-medium rounded-full border border-dashed border-[var(--border-subtle)] text-[var(--text-tertiary)] italic cursor-default">
+              and many more
+            </span>
           </div>
         </div>
 

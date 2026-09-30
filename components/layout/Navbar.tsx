@@ -54,6 +54,7 @@ export function Navbar() {
     { name: 'Explore', href: '/explore' },
     { name: 'Leaderboard', href: '/leaderboard' },
     { name: 'Career', href: '/career' },
+    { name: 'Docs', href: '/docs' },
   ];
 
   const userLinks = [
