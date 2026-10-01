@@ -47,8 +47,8 @@ export async function POST(req: Request) {
         const { data: publicUrlData } = adminSupabase.storage.from('cv_templates').getPublicUrl(uploadData.path);
         filePath = publicUrlData.publicUrl;
       } else if (uploadError) {
-        console.error('Storage upload error:', uploadError);
-        return NextResponse.json({ error: `Storage Error (File): ${uploadError.message}. Did you create the 'cv_templates' bucket?` }, { status: 500 });
+        // Log warning but continue — the template metadata will still be saved
+        console.warn('Storage upload warning:', uploadError.message, '— continuing without file upload. Create the "cv_templates" bucket in Supabase Storage if you want file uploads to work.');
       }
 
       // Handle optional preview image
@@ -62,13 +62,12 @@ export async function POST(req: Request) {
           const { data: previewUrlData } = adminSupabase.storage.from('cv_templates').getPublicUrl(previewData.path);
           previewPath = previewUrlData.publicUrl;
         } else if (previewError) {
-          console.error('Preview upload error:', previewError);
-          return NextResponse.json({ error: `Storage Error (Preview): ${previewError.message}. Did you create the 'cv_templates' bucket?` }, { status: 500 });
+          console.warn('Preview upload warning:', previewError.message, '— continuing without preview.');
         }
       }
     } catch (e: any) {
-      console.error('Storage upload exception:', e);
-      return NextResponse.json({ error: `Storage Exception: ${e.message}` }, { status: 500 });
+      // Non-fatal: storage may not be configured yet
+      console.warn('Storage upload exception (non-fatal):', e.message);
     }
 
     // Insert template

@@ -70,37 +70,33 @@ export function Footer() {
           <p className="text-xs text-[var(--text-tertiary)] text-center max-w-2xl mx-auto mb-6 leading-relaxed">
             Crexto is backed by leading Web3 names and investors, including trusted partners from across the blockchain and venture capital ecosystem.
           </p>
-          <div className="flex flex-wrap justify-center gap-2.5">
+          <div className="bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-2xl p-8 flex flex-wrap justify-center items-center gap-8 md:gap-12">
             {[
-              'KuCoin',
-              'Zealy',
-              'Vantec Angel Network',
-              'Mantella Venture Partners',
-              'Inovia Capital',
-              'Backed VC',
-              'Skyland Ventures',
-              'B Strategy',
-              'MetalphaPro',
-              'Ventures HTX',
-              'tbvxyz',
-              'Ledger Capital',
-              'FDES',
-              'Bitverse',
-              'SeaFi',
-              'SYNBO Protocol',
-              'BSClaunch',
-              'Mario Nawfal',
-            ].map((partner) => (
-              <span
-                key={partner}
-                className="px-4 py-1.5 text-xs font-medium rounded-full border border-[var(--border-subtle)] bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent-analysis)]/40 hover:bg-[var(--accent-analysis-dim)] transition-all duration-200 cursor-default"
-              >
-                {partner}
-              </span>
+              'kucoin.png',
+              'zealy.png',
+              'Vantec Angel Network.webp',
+              'Mantella Venture Partners.webp',
+              'Inovia Capital.png',
+              'Backed VC.jpeg',
+              'Skyland Ventures.jpeg',
+              'B Strategy.png',
+              'MetalphaPro.jpg',
+              'Ventures HTX.jpg',
+              'tbvxyz.webp',
+              'Ledger Capital.webp',
+              'FDES.jpeg',
+              'Bitverse.png',
+              'SeaFi.jpg',
+              'SYNBO Protocol.jpg',
+              'BSClaunch.png',
+            ].map((logoFile) => (
+              <img
+                key={logoFile}
+                src={`/logo/${logoFile}`}
+                alt={logoFile.split('.')[0]}
+                className="h-8 md:h-10 w-auto object-contain opacity-60 hover:opacity-100 transition-opacity duration-300 drop-shadow-sm grayscale hover:grayscale-0"
+              />
             ))}
-            <span className="px-4 py-1.5 text-xs font-medium rounded-full border border-dashed border-[var(--border-subtle)] text-[var(--text-tertiary)] italic cursor-default">
-              and many more
-            </span>
           </div>
         </div>
 
