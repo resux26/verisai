@@ -11,22 +11,35 @@ export const metadata: Metadata = {
   description: 'Browse community-created CV and resume templates optimized for AI screening and ATS systems.',
 };
 
-export default async function TemplateGalleryPage() {
+export default async function TemplateGalleryPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const params = await searchParams;
+  const currentPage = Math.max(1, parseInt(params.page || '1', 10));
+  const ITEMS_PER_PAGE = 20;
+
   const supabase = await createClient();
 
   let templates: any[] = [];
+  let totalCount = 0;
 
   try {
-    const { data } = await supabase
+    const from = (currentPage - 1) * ITEMS_PER_PAGE;
+    const to = from + ITEMS_PER_PAGE - 1;
+
+    const { data, count } = await supabase
       .from('cv_templates')
-      .select('*, profiles(username, full_name)')
+      .select('*, profiles(username, full_name)', { count: 'exact' })
       .eq('visibility', 'public')
       .order('created_at', { ascending: false })
-      .limit(20);
+      .range(from, to);
+
     templates = data || [];
+    totalCount = count || 0;
   } catch (e) {
     // DB error
   }
+
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+  const safePage = Math.min(currentPage, Math.max(1, totalPages));
 
   return (
     <div className="min-h-screen pb-20">
@@ -107,6 +120,35 @@ export default async function TemplateGalleryPage() {
                 </Card>
               </Link>
             ))}
+          </div>
+        )}
+        
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="mt-12 flex justify-center items-center gap-2">
+            <Link
+              href={`/career/templates?page=${safePage - 1}`}
+              className={`px-4 py-2 text-sm font-medium border rounded-lg transition-colors ${safePage <= 1 ? 'pointer-events-none opacity-50 border-[var(--border-subtle)] text-[var(--text-tertiary)]' : 'border-[var(--border-subtle)] text-[var(--text-primary)] hover:border-[var(--border-hover)] bg-[var(--bg-elevated)]'}`}
+            >
+              Previous
+            </Link>
+            <div className="flex gap-1 mx-2 sm:mx-4 overflow-x-auto">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+                <Link
+                  key={pageNum}
+                  href={`/career/templates?page=${pageNum}`}
+                  className={`min-w-[40px] h-10 flex items-center justify-center rounded-lg text-sm font-bold border transition-colors ${pageNum === safePage ? 'bg-[var(--accent-analysis)] border-transparent text-white' : 'border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-hover)] bg-[var(--bg-elevated)]'}`}
+                >
+                  {pageNum}
+                </Link>
+              ))}
+            </div>
+            <Link
+              href={`/career/templates?page=${safePage + 1}`}
+              className={`px-4 py-2 text-sm font-medium border rounded-lg transition-colors ${safePage >= totalPages ? 'pointer-events-none opacity-50 border-[var(--border-subtle)] text-[var(--text-tertiary)]' : 'border-[var(--border-subtle)] text-[var(--text-primary)] hover:border-[var(--border-hover)] bg-[var(--bg-elevated)]'}`}
+            >
+              Next
+            </Link>
           </div>
         )}
       </div>
