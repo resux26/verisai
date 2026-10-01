@@ -191,7 +191,7 @@ export default async function Home() {
                       </div>
                       <div className="text-right">
                         <div className="font-mono font-bold text-sm text-[var(--accent-analysis)]">{u.total_points.toLocaleString()}</div>
-                        <div className="text-[10px] uppercase tracking-widest text-[var(--text-tertiary)] font-bold">REP</div>
+                        <div className="text-[10px] uppercase tracking-widest text-[var(--text-tertiary)] font-bold">CRX</div>
                       </div>
                     </div>
                   ))

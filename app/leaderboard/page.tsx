@@ -189,7 +189,7 @@ function LeaderboardCard({ user, rank, isTop3 }: { user: any, rank: number, isTo
             <div className={`font-mono font-bold leading-none mb-1 ${isRank1 ? 'text-3xl text-[var(--accent-analysis)]' : 'text-2xl text-[var(--text-primary)]'}`}>
               {user.total_points.toLocaleString()}
             </div>
-            <div className="text-[10px] uppercase tracking-widest text-[var(--text-tertiary)] font-bold">REP</div>
+            <div className="text-[10px] uppercase tracking-widest text-[var(--text-tertiary)] font-bold">CRX</div>
           </div>
 
           <div className="w-full flex justify-between text-xs text-[var(--text-secondary)] pt-4 border-t border-[var(--border-subtle)]">
@@ -229,7 +229,7 @@ function LeaderboardRow({ user, rank }: { user: any, rank: number }) {
             <div className="font-mono font-bold text-base sm:text-lg text-[var(--text-primary)]">
               {user.total_points.toLocaleString()}
             </div>
-            <div className="text-[10px] uppercase tracking-widest text-[var(--text-tertiary)] font-bold">REP</div>
+            <div className="text-[10px] uppercase tracking-widest text-[var(--text-tertiary)] font-bold">CRX</div>
           </div>
         </div>
       </Card>

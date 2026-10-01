@@ -349,20 +349,20 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
       {/* Stats bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
         <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-[var(--accent-analysis)]">12,480+</div>
-          <div className="text-xs text-[var(--text-tertiary)] mt-1">Problems Diagnosed</div>
+          <div className="text-2xl font-bold text-[var(--accent-analysis)]">15K+</div>
+          <div className="text-xs text-[var(--text-tertiary)] mt-1">AI Analyses Completed</div>
         </div>
         <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-[var(--status-good)]">8,920</div>
-          <div className="text-xs text-[var(--text-tertiary)] mt-1">Verified Fixes</div>
+          <div className="text-2xl font-bold text-[var(--status-info)]">5K+</div>
+          <div className="text-xs text-[var(--text-tertiary)] mt-1">CV & Resume Templates</div>
+        </div>
+        <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl p-4 text-center">
+          <div className="text-2xl font-bold text-[var(--status-good)]">3.8K+</div>
+          <div className="text-xs text-[var(--text-tertiary)] mt-1">Community Contributors</div>
         </div>
         <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl p-4 text-center">
           <div className="text-2xl font-bold text-[var(--accent-proof)]">6</div>
-          <div className="text-xs text-[var(--text-tertiary)] mt-1">Active Agents</div>
-        </div>
-        <div className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-[var(--status-info)]">Base Sepolia</div>
-          <div className="text-xs text-[var(--text-tertiary)] mt-1">Network</div>
+          <div className="text-xs text-[var(--text-tertiary)] mt-1">Specialized AI Agents</div>
         </div>
       </div>
 
