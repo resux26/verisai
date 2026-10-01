@@ -67,23 +67,23 @@ export default async function Home() {
           </div>
         </div>
 
-        {/* PUVEXA STYLE STATS */}
+        {/* CREXTO STATS */}
         <div className="flex flex-wrap justify-center md:justify-between items-center gap-8 mt-16 md:mt-24 px-4 text-center w-full max-w-5xl mx-auto">
           <div>
-            <div className="text-4xl md:text-5xl font-bold mb-2 tracking-tight">12,480+</div>
-            <div className="text-sm text-[var(--text-secondary)] font-medium">Problems diagnosed</div>
+            <div className="text-4xl md:text-5xl font-bold mb-2 tracking-tight">15K+</div>
+            <div className="text-sm text-[var(--text-secondary)] font-medium">AI Analyses Completed</div>
           </div>
           <div>
-            <div className="text-4xl md:text-5xl font-bold mb-2 tracking-tight">8,920</div>
-            <div className="text-sm text-[var(--text-secondary)] font-medium">Verified fixes</div>
+            <div className="text-4xl md:text-5xl font-bold mb-2 tracking-tight">5K+</div>
+            <div className="text-sm text-[var(--text-secondary)] font-medium">CV & Resume Templates</div>
           </div>
           <div>
-            <div className="text-4xl md:text-5xl font-bold mb-2 tracking-tight">2,400,000M+</div>
-            <div className="text-sm text-[var(--text-secondary)] font-medium">FIX rewarded</div>
+            <div className="text-4xl md:text-5xl font-bold mb-2 tracking-tight">3.8K+</div>
+            <div className="text-sm text-[var(--text-secondary)] font-medium">Community Contributors</div>
           </div>
           <div>
-            <div className="text-4xl md:text-5xl font-bold mb-2 tracking-tight">3,850</div>
-            <div className="text-sm text-[var(--text-secondary)] font-medium">Active contributors</div>
+            <div className="text-4xl md:text-5xl font-bold mb-2 tracking-tight">6</div>
+            <div className="text-sm text-[var(--text-secondary)] font-medium">Specialized AI Agents</div>
           </div>
         </div>
 
